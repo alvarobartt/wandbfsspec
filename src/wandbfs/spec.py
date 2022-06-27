@@ -34,3 +34,9 @@ class WandbFileSystem(AbstractFileSystem):
         self.entity = entity
         self.project = project
         self.run_id = run_id
+
+    @property
+    def run(self):
+        if self._run is None:
+            self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
+        return self._run
