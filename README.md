@@ -1,10 +1,3 @@
-# 🎈 Python Package Template
+# 🍱 Filesystem interface for Weights & Biases (wandb) Files and Artifacts.
 
-## ✨ Features
-
-* Package configuration with `pyproject.toml` built with `Poetry`
-* Code formatting with `black`, `isort`, and `flake8`
-* Type hint checking with `mypy`
-* `Dockerfiles` for both CPU and GPU machines
-* `pre-commit` configuration file
-* GitHub Codespaces can be created from `.devcontainer`
+Based on https://github.com/fsspec/filesystem_spec.

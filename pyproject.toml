@@ -3,19 +3,19 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "package"
+name = "wandbfs"
 version = "0.0.1"
 packages = [
-    { include = "package", from = "src" },
+    { include = "wandbfs", from = "src" },
 ]
-description = "Python package description."
+description = "Filesystem interface for Weights & Biases (wandb) Files and Artifacts."
 authors = [
     "Alvaro Bartolome <alvarobartt@yahoo.com>"
 ]
 readme = "README.md"
-homepage = "https://github.com/alvarobartt/python-package-template"
-documentation = "https://github.com/alvarobartt/python-package-template"
-repository = "https://github.com/alvarobartt/python-package-template"
+homepage = "https://github.com/alvarobartt/wandbfs"
+documentation = "https://github.com/alvarobartt/wandbfs"
+repository = "https://github.com/alvarobartt/wandbfs"
 license = "MIT License"
 
 [tool.poetry.dependencies]
