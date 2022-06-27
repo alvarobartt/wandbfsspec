@@ -2,6 +2,8 @@
 # See LICENSE for details.
 
 import os
+from pathlib import Path
+from typing import List, Union
 
 import wandb
 from fsspec import AbstractFileSystem
@@ -40,3 +42,12 @@ class WandbFileSystem(AbstractFileSystem):
         if self._run is None:
             self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
         return self._run
+
+    def ls(self, path: Union[str, Path] = Path("./")) -> List[str]:
+        path = Path(path) if isinstance(path, str) else path
+        files = []
+        for _file in self.run.files():
+            if path not in Path(_file.name).parents:
+                continue
+            files.append(_file.name)
+        return files
