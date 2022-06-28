@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List, Union
 
 import wandb
+from wandb.sdk.wandb_run import Run
 from fsspec import AbstractFileSystem
 
 
@@ -38,7 +39,7 @@ class WandbFileSystem(AbstractFileSystem):
         self.run_id = run_id
 
     @property
-    def run(self):
+    def run(self) -> Run:
         if self._run is None:
             self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
         return self._run
