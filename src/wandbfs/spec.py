@@ -14,10 +14,10 @@ class WandbFileSystem(AbstractFileSystem):
 
     def __init__(
         self,
-        api_key: str = None,
-        entity: str = None,
-        project: str = None,
-        run_id: str = None,
+        api_key: Union[str, None] = None,
+        entity: Union[str, None] = None,
+        project: Union[str, None] = None,
+        run_id: Union[str, None] = None,
     ) -> None:
         super().__init__()
 
