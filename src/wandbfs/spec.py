@@ -3,7 +3,7 @@
 
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import wandb
 from wandb.sdk.wandb_run import Run
@@ -44,11 +44,11 @@ class WandbFileSystem(AbstractFileSystem):
             self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
         return self._run
 
-    def ls(self, path: Union[str, Path] = Path("./")) -> List[str]:
+    def ls(self, path: Union[str, Path] = Path("./")) -> List[Dict[str, Any]]:
         path = Path(path) if isinstance(path, str) else path
         files = []
         for _file in self.run.files():
             if path not in Path(_file.name).parents:
                 continue
-            files.append(_file.name)
+            files.append(_file.__dict__["_attrs"])
         return files
