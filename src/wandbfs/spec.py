@@ -3,11 +3,13 @@
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Tuple, Union
 
 import wandb
-from wandb.sdk.wandb_run import Run
 from fsspec import AbstractFileSystem
+from wandb.sdk.wandb_run import Run
+
+MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
 
 
 class WandbFileSystem(AbstractFileSystem):
@@ -43,6 +45,23 @@ class WandbFileSystem(AbstractFileSystem):
         if self._run is None:
             self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
         return self._run
+
+    @classmethod
+    def split_path(
+        self, path: str
+    ) -> Tuple[str, Union[str, None], Union[str, None], Union[str, None]]:
+        path = self._strip_protocol(path=path)
+        path = path.lstrip("/")
+        if "/" not in path:
+            return (path, None, None, None)
+        path = path.split("/")
+        if len(path) > MAX_PATH_LENGTH_WITHOUT_FILEPATH:
+            return (
+                *path[:MAX_PATH_LENGTH_WITHOUT_FILEPATH],
+                "/".join(path[MAX_PATH_LENGTH_WITHOUT_FILEPATH:]),
+            )
+        path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
+        return (*path, None)
 
     def ls(self, path: Union[str, Path] = Path("./")) -> List[Dict[str, Any]]:
         path = Path(path) if isinstance(path, str) else path
