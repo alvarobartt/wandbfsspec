@@ -7,7 +7,6 @@ from typing import Any, Dict, List, Tuple, Union
 
 import wandb
 from fsspec import AbstractFileSystem
-from wandb.sdk.wandb_run import Run
 
 MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
 
@@ -34,17 +33,6 @@ class WandbFileSystem(AbstractFileSystem):
         )
 
         self.api = wandb.Api()
-        self._run = None
-
-        self.entity = entity
-        self.project = project
-        self.run_id = run_id
-
-    @property
-    def run(self) -> Run:
-        if self._run is None:
-            self._run = self.api.run(f"{self.entity}/{self.project}/{self.run_id}")
-        return self._run
 
     @classmethod
     def split_path(
