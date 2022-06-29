@@ -33,3 +33,15 @@ class TestWandbFileSystem:
         _file = self.fs.open(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml")
         assert isinstance(_file, bytes)
 
+    def test_ls_from_fsspec(self) -> None:
+        import fsspec
+        fs = fsspec.filesystem("wandbfs")
+        files = fs.ls(path="wandbfs://alvarobartt/resnet-pytorch")
+        print(files)
+        assert isinstance(files, List)
+
+    def test_open_from_fsspec(self) -> None:
+        import fsspec
+        fs = fsspec.filesystem("wandbfs")
+        with fs.open(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml", mode="rb") as f:
+            print(f.read())
