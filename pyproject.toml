@@ -18,6 +18,9 @@ documentation = "https://github.com/alvarobartt/wandbfs"
 repository = "https://github.com/alvarobartt/wandbfs"
 license = "MIT License"
 
+[tool.poetry.plugins."fsspec.specs"]
+wandbfs = "wandbfs.spec.WandbFileSystem"
+
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
 fsspec = "^2022.5.0"
