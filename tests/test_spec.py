@@ -29,3 +29,7 @@ class TestWandbFileSystem:
         modified_at = self.fs.modified(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml")
         assert isinstance(modified_at, datetime.datetime)
 
+    def test_open(self) -> None:
+        _file = self.fs.open(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml")
+        assert isinstance(_file, bytes)
+
