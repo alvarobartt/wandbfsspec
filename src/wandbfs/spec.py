@@ -1,6 +1,7 @@
 # Copyright 2022 Alvaro Bartolome, alvarobartt @ GitHub
 # See LICENSE for details.
 
+import datetime
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Tuple, Union
@@ -68,3 +69,13 @@ class WandbFileSystem(AbstractFileSystem):
                 continue
             files.append(_file.name)
         return files
+
+    def modified(self, path: str) -> datetime.datetime:
+        """Return the modified timestamp of a file as a datetime.datetime"""
+        entity, project, run_id, filepath = self.split_path(path=path)
+        if not filepath:
+            raise ValueError
+        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        if not _file:
+            raise ValueError
+        return datetime.datetime.fromisoformat(_file.__dict__["_attrs"]["updatedAt"])
