@@ -49,7 +49,7 @@ class WandbFileSystem(AbstractFileSystem):
         path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
         return (*path, None)
 
-    def ls(self, path: str) -> List[str]:
+    def ls(self, path: str, detail: bool = True) -> List[str]:
         entity, project, run_id, filepath = self.split_path(path=path)
         if not entity:
             return []
@@ -64,8 +64,13 @@ class WandbFileSystem(AbstractFileSystem):
         for _file in _files:
             if filepath not in Path(_file.name).parents:
                 continue
-            files.append(_file.name)
-        return files
+            files.append(
+                {
+                    "name": f"{entity}/{project}/{run_id}/{_file.name}",
+                    "size": _file.size,
+                }
+            )
+        return files if detail else [f["name"] for f in files]
 
     def modified(self, path: str) -> datetime.datetime:
         """Return the modified timestamp of a file as a datetime.datetime"""
