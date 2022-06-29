@@ -51,11 +51,20 @@ class WandbFileSystem(AbstractFileSystem):
         path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
         return (*path, None)
 
-    def ls(self, path: Union[str, Path] = Path("./")) -> List[Dict[str, Any]]:
-        path = Path(path) if isinstance(path, str) else path
+    def ls(self, path: Union[str, Path] = Path("wandbfs://")) -> List[Dict[str, Any]]:
+        entity, project, run_id, filepath = self.split_path(path=path)
+        if not entity:
+            return []
+        if entity and not project and not run_id:
+            _files = self.api.projects(entity=entity)
+        if entity and project and not run_id:
+            _files = self.api.runs(f"{entity}/{project}")
+        if entity and project and run_id:
+            _files = self.api.run(f"{entity}/{project}/{run_id}").files()
+        filepath = Path(filepath if filepath else "./")
         files = []
-        for _file in self.run.files():
-            if path not in Path(_file.name).parents:
+        for _file in _files:
+            if filepath not in Path(_file.name).parents:
                 continue
-            files.append(_file.__dict__["_attrs"])
+            files.append(_file.name)
         return files
