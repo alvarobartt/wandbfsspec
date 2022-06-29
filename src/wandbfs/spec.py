@@ -4,7 +4,7 @@
 import datetime
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Union
+from typing import List, Tuple, Union
 
 import wandb
 from fsspec import AbstractFileSystem
@@ -18,9 +18,6 @@ class WandbFileSystem(AbstractFileSystem):
     def __init__(
         self,
         api_key: Union[str, None] = None,
-        entity: Union[str, None] = None,
-        project: Union[str, None] = None,
-        run_id: Union[str, None] = None,
     ) -> None:
         super().__init__()
 
@@ -52,7 +49,7 @@ class WandbFileSystem(AbstractFileSystem):
         path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
         return (*path, None)
 
-    def ls(self, path: Union[str, Path] = Path("wandbfs://")) -> List[Dict[str, Any]]:
+    def ls(self, path: str) -> List[str]:
         entity, project, run_id, filepath = self.split_path(path=path)
         if not entity:
             return []
