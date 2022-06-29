@@ -3,11 +3,13 @@
 
 import datetime
 import os
+import urllib.request
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Literal, Tuple, Union
 
 import wandb
 from fsspec import AbstractFileSystem
+from fsspec.spec import AbstractBufferedFile
 
 MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
 
@@ -81,3 +83,31 @@ class WandbFileSystem(AbstractFileSystem):
         if not _file:
             raise ValueError
         return datetime.datetime.fromisoformat(_file.__dict__["_attrs"]["updatedAt"])
+
+    def open(self, path: str, mode: Literal["rb"] = "rb") -> None:
+        _, _, _, filepath = self.split_path(path=path)
+        if not filepath:
+            raise ValueError
+        return WandbFile(self, path=path, mode=mode)
+
+
+class WandbFile(AbstractBufferedFile):
+    def __init__(
+        self, api: WandbFileSystem, path: str, mode: Literal["rb"] = "rb"
+    ) -> None:
+        super().__init__(
+            api,
+            path,
+            mode,
+        )
+
+        entity, project, run_id, filepath = self.fs.split_path(path=path)
+        _file = self.fs.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        if not _file:
+            raise ValueError
+        self.url = _file._attrs["directUrl"]
+
+    def _fetch_range(
+        self, start: Union[int, None] = None, end: Union[int, None] = None
+    ) -> bytes:
+        return urllib.request.urlopen(self.url).read()
