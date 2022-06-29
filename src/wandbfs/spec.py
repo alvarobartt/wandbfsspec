@@ -13,7 +13,7 @@ MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
 
 
 class WandbFileSystem(AbstractFileSystem):
-    protocol = "wandb"
+    protocol = "wandbfs"
 
     def __init__(
         self,
