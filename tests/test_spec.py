@@ -21,5 +21,5 @@ class TestWandbFileSystem:
 
     def test_ls(self) -> None:
         """Test `WandbFileSystem.ls` method."""
-        files = self.fs.ls(path="./media/graph")
+        files = self.fs.ls(path="wandbfs://alvarobartt/resnet-pytorch")
         assert isinstance(files, List)
