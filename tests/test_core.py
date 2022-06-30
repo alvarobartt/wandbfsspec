@@ -7,11 +7,11 @@ import pytest
 
 import datetime
 
-from wandbfs.spec import WandbFileSystem
+from wandbfs.core import WandbFileSystem
 
 
 class TestWandbFileSystem:
-    """Test `wandbfs.spec.WandbFileSystem` class methods."""
+    """Test `wandbfs.core.WandbFileSystem` class methods."""
 
     @pytest.fixture(autouse=True)
     def setup_method(self) -> None:
