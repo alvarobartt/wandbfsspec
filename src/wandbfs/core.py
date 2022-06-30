@@ -95,7 +95,7 @@ class WandbFileSystem(AbstractFileSystem):
             raise ValueError
         return datetime.datetime.fromisoformat(_file.__dict__["_attrs"]["updatedAt"])
 
-    def open(self, path: str, mode: Literal["rb"] = "rb") -> None:
+    def open(self, path: str, mode: Literal["rb", "wb"] = "rb") -> None:
         _, _, _, filepath = self.split_path(path=path)
         if not filepath:
             raise ValueError
@@ -118,10 +118,15 @@ class WandbFileSystem(AbstractFileSystem):
         req.add_header("Range", f"bytes={start}-{end}")
         return urllib.request.urlopen(req).read()
 
+    def put_file(self, lpath: str, rpath: str, **kwargs) -> None:
+        entity, project, run_id, filepath = self.split_path(path=rpath)
+        run = self.api.run(f"{entity}/{project}/{run_id}")
+        run.upload_file(path=lpath, root=Path(filepath).parents[0].as_posix())
+
 
 class WandbFile(AbstractBufferedFile):
     def __init__(
-        self, fs: WandbFileSystem, path: str, mode: Literal["rb"] = "rb"
+        self, fs: WandbFileSystem, path: str, mode: Literal["rb", "wb"] = "rb"
     ) -> None:
         super().__init__(fs=fs, path=path, mode=mode)
 
