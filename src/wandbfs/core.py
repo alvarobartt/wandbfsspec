@@ -64,13 +64,22 @@ class WandbFileSystem(AbstractFileSystem):
         filepath = Path(filepath if filepath else "./")
         files = []
         for _file in _files:
-            if filepath not in Path(_file.name).parents:
+            filename = Path(_file.name)
+            if filepath not in filename.parents:
+                continue
+            if not run_id or filename.is_dir():
+                files.append(
+                    {
+                        "name": f"{entity}/{project}/{run_id}/{_file.name}",
+                        "type": "directory",
+                        "size": 0,
+                    }
+                )
                 continue
             files.append(
                 {
                     "name": f"{entity}/{project}/{run_id}/{_file.name}",
-                    "url": _file.url,
-                    "direct_url": _file.direct_url,
+                    "type": "file",
                     "size": _file.size,
                 }
             )
