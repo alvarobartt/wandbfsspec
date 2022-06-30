@@ -100,10 +100,14 @@ class WandbFileSystem(AbstractFileSystem):
         return _file._attrs["directUrl"]
 
     def cat_file(
-        self, path, start: Union[str, None] = None, end: Union[str, None] = None
+        self, path, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
         url = self.url(path=path)
-        return urllib.request.urlopen(url).read()
+        req = urllib.request.Request(url=url)
+        if not start and not end:
+            start, end = 0, ""
+        req.add_header("Range", f"bytes={start}-{end}")
+        return urllib.request.urlopen(req).read()
 
 
 class WandbFile(AbstractBufferedFile):
