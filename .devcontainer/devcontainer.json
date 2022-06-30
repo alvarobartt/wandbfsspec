@@ -4,6 +4,8 @@
 	},
 	"extensions": [
 		"ms-python.python",
-		"eamodio.gitlens"
+		"eamodio.gitlens",
+		"bungcip.better-toml",
+		"ms-azuretools.vscode-docker"
 	]
 }
