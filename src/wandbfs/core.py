@@ -99,7 +99,7 @@ class WandbFileSystem(AbstractFileSystem):
             raise ValueError
         return _file._attrs["directUrl"]
 
-    def _cat_file(
+    def cat_file(
         self, path, start: Union[str, None] = None, end: Union[str, None] = None
     ) -> bytes:
         url = self.url(path=path)
@@ -115,4 +115,4 @@ class WandbFile(AbstractBufferedFile):
     def _fetch_range(
         self, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
-        return self.fs._cat_file(path=self.path, start=start, end=end)
+        return self.fs.cat_file(path=self.path, start=start, end=end)
