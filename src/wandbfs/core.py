@@ -69,6 +69,8 @@ class WandbFileSystem(AbstractFileSystem):
             files.append(
                 {
                     "name": f"{entity}/{project}/{run_id}/{_file.name}",
+                    "url": _file.url,
+                    "direct_url": _file.direct_url,
                     "size": _file.size,
                 }
             )
@@ -90,24 +92,27 @@ class WandbFileSystem(AbstractFileSystem):
             raise ValueError
         return WandbFile(self, path=path, mode=mode)
 
+    def url(self, path: str) -> str:
+        entity, project, run_id, filepath = self.split_path(path=path)
+        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        if not _file:
+            raise ValueError
+        return _file._attrs["directUrl"]
+
+    def _cat_file(
+        self, path, start: Union[str, None] = None, end: Union[str, None] = None
+    ) -> bytes:
+        url = self.url(path=path)
+        return urllib.request.urlopen(url).read()
+
 
 class WandbFile(AbstractBufferedFile):
     def __init__(
-        self, api: WandbFileSystem, path: str, mode: Literal["rb"] = "rb"
+        self, fs: WandbFileSystem, path: str, mode: Literal["rb"] = "rb"
     ) -> None:
-        super().__init__(
-            api,
-            path,
-            mode,
-        )
-
-        entity, project, run_id, filepath = self.fs.split_path(path=path)
-        _file = self.fs.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
-        if not _file:
-            raise ValueError
-        self.url = _file._attrs["directUrl"]
+        super().__init__(fs=fs, path=path, mode=mode)
 
     def _fetch_range(
         self, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
-        return urllib.request.urlopen(self.url).read()
+        return self.fs._cat_file(path=self.path, start=start, end=end)
