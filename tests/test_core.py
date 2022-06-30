@@ -6,7 +6,7 @@ from typing import List
 
 import pytest
 
-from wandbfs.core import WandbFileSystem
+from wandbfs.core import WandbFile, WandbFileSystem
 
 
 class TestWandbFileSystem:
@@ -21,7 +21,7 @@ class TestWandbFileSystem:
 
     def test_ls(self) -> None:
         """Test `WandbFileSystem.ls` method."""
-        files = self.fs.ls(path="wandbfs://alvarobartt/resnet-pytorch")
+        files = self.fs.ls(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/media")
         assert isinstance(files, List)
 
     def test_modified(self) -> None:
@@ -34,14 +34,13 @@ class TestWandbFileSystem:
         _file = self.fs.open(
             path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml"
         )
-        assert isinstance(_file, bytes)
+        assert isinstance(_file, WandbFile)
 
     def test_ls_from_fsspec(self) -> None:
         import fsspec
 
         fs = fsspec.filesystem("wandbfs")
-        files = fs.ls(path="wandbfs://alvarobartt/resnet-pytorch")
-        print(files)
+        files = fs.ls(path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2")
         assert isinstance(files, List)
 
     def test_open_from_fsspec(self) -> None:
@@ -51,4 +50,4 @@ class TestWandbFileSystem:
         with fs.open(
             path="wandbfs://alvarobartt/resnet-pytorch/3boz9td2/config.yaml", mode="rb"
         ) as f:
-            print(f.read())
+            assert isinstance(f, WandbFile)
