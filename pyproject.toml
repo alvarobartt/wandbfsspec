@@ -8,7 +8,7 @@ version = "0.0.1"
 packages = [
     { include = "wandbfsspec", from = "src" },
 ]
-description = "Filesystem specification for Weights & Biases (wandb) Files and Artifacts."
+description = "fsspec interface for Weights & Biases (wandb)"
 authors = [
     "Alvaro Bartolome <alvarobartt@yahoo.com>"
 ]

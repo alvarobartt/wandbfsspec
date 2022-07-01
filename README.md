@@ -1,3 +1,3 @@
-# 🍱 Filesystem interface for Weights & Biases (wandb) Files and Artifacts.
+# 🍱 `fsspec` interface for Weights & Biases (wandb)
 
 Based on https://github.com/fsspec/filesystem_spec.
