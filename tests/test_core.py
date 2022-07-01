@@ -6,11 +6,11 @@ from typing import List
 
 import pytest
 
-from wandbfs.core import WandbFile, WandbFileSystem
+from wandbfsspec.core import WandbFile, WandbFileSystem
 
 
 class TestWandbFileSystem:
-    """Test `wandbfs.core.WandbFileSystem` class methods."""
+    """Test `wandbfsspec.core.WandbFileSystem` class methods."""
 
     @pytest.fixture(autouse=True)
     def setup_method(self) -> None:

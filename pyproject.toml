@@ -3,23 +3,23 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
-name = "wandbfs"
+name = "wandbfsspec"
 version = "0.0.1"
 packages = [
-    { include = "wandbfs", from = "src" },
+    { include = "wandbfsspec", from = "src" },
 ]
-description = "Filesystem interface for Weights & Biases (wandb) Files and Artifacts."
+description = "Filesystem specification for Weights & Biases (wandb) Files and Artifacts."
 authors = [
     "Alvaro Bartolome <alvarobartt@yahoo.com>"
 ]
 readme = "README.md"
-homepage = "https://github.com/alvarobartt/wandbfs"
-documentation = "https://github.com/alvarobartt/wandbfs"
-repository = "https://github.com/alvarobartt/wandbfs"
+homepage = "https://github.com/alvarobartt/wandbfsspec"
+documentation = "https://github.com/alvarobartt/wandbfsspec"
+repository = "https://github.com/alvarobartt/wandbfsspec"
 license = "MIT License"
 
 [tool.poetry.plugins."fsspec.specs"]
-wandbfs = "wandbfs.core.WandbFileSystem"
+wandbfs = "wandbfsspec.core.WandbFileSystem"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
