@@ -53,14 +53,14 @@ class WandbFileSystem(AbstractFileSystem):
 
     def ls(self, path: str, detail: bool = True) -> List[str]:
         entity, project, run_id, filepath = self.split_path(path=path)
-        if not entity:
-            return []
-        if entity and not project and not run_id:
-            _files = self.api.projects(entity=entity)
-        if entity and project and not run_id:
-            _files = self.api.runs(f"{entity}/{project}")
         if entity and project and run_id:
             _files = self.api.run(f"{entity}/{project}/{run_id}").files()
+        elif entity and project:
+            _files = self.api.runs(f"{entity}/{project}")
+        elif entity:
+            _files = self.api.projects(entity=entity)
+        else:
+            return []
         filepath = Path(filepath if filepath else "./")
         files = []
         for _file in _files:
@@ -74,6 +74,8 @@ class WandbFileSystem(AbstractFileSystem):
                         "type": "directory",
                         "size": 0,
                     }
+                    if detail
+                    else f"{entity}/{project}/{run_id}/{_file.name}"
                 )
                 continue
             files.append(
@@ -82,8 +84,10 @@ class WandbFileSystem(AbstractFileSystem):
                     "type": "file",
                     "size": _file.size,
                 }
+                if detail
+                else f"{entity}/{project}/{run_id}/{_file.name}"
             )
-        return files if detail else [f["name"] for f in files]
+        return files
 
     def modified(self, path: str) -> datetime.datetime:
         """Return the modified timestamp of a file as a datetime.datetime"""
