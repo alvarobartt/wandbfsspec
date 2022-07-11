@@ -26,7 +26,7 @@ class WandbFileSystem(AbstractFileSystem):
         if api_key:
             os.environ["WANDB_API_KEY"] = api_key
 
-        assert os.getenv("WANDB_API_KEY") is None, (
+        assert os.getenv("WANDB_API_KEY"), (
             "In order to connect to the wandb Public API you need to provide the API"
             " key either via param `api_key`, setting the key in the environment"
             " variable `WANDB_API_KEY`, or running `wandb login <WANDB_API_KEY>`."
