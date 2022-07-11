@@ -43,4 +43,4 @@ jobs:
       - name: tests
         run: poetry run make tests
         env:
-          wandb_api_key: ${{ secrets.WANDB_API_KEY }}
+          WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
