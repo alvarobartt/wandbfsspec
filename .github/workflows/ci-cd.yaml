@@ -13,7 +13,7 @@ jobs:
   check-style:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/alvarobartt/wandbfsspec
+      image: ghcr.io/alvarobartt/wandbfsspec:main
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -28,7 +28,7 @@ jobs:
   run-tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/alvarobartt/wandbfsspec
+      image: ghcr.io/alvarobartt/wandbfsspec:main
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
