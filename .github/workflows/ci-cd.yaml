@@ -1,0 +1,51 @@
+name: ci-cd
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/ci-cd.yaml
+      - src/**
+      - tests/**
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAG: main
+
+jobs:
+  check-style:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: style
+        run: poetry run make style
+
+  run-tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: install-package
+        run: poetry install
+
+      - name: tests
+        run: poetry run make tests
+        env:
+          wandb_api_key: ${{ secrets.WANDB_API_KEY }}
