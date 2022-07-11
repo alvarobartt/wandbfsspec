@@ -26,6 +26,8 @@ jobs:
         run: poetry run make style
 
   run-tests:
+    needs: check-style
+
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/alvarobartt/wandbfsspec:main
