@@ -1,4 +1,4 @@
-.PHONY: quality style test
+.PHONY: quality style tests
 
 quality:
 	black --check --target-version py39 src/wandbfsspec tests
@@ -9,5 +9,5 @@ style:
 	black --target-version py39 src/wandbfsspec tests
 	isort src/wandbfsspec tests
 
-test:
-	python -m pytest tests/ --durations 0 -s
+tests:
+	pytest tests/ --durations 0 -s
