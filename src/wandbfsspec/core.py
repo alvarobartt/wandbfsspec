@@ -113,7 +113,7 @@ class WandbFileSystem(AbstractFileSystem):
         return _file._attrs["directUrl"]
 
     def cat_file(
-        self, path, start: Union[int, None] = None, end: Union[int, None] = None
+        self, path: str, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
         url = self.url(path=path)
         req = urllib.request.Request(url=url)
