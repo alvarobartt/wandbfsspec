@@ -132,6 +132,11 @@ class WandbFileSystem(AbstractFileSystem):
         file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
         file.download(root=lpath, replace=overwrite)
 
+    def rm_file(self, path: str) -> None:
+        entity, project, run_id, filepath = self.split_path(path=path)
+        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        file.delete()
+
 
 class WandbFile(AbstractBufferedFile):
     def __init__(
