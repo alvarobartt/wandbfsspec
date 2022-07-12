@@ -137,6 +137,12 @@ class WandbFileSystem(AbstractFileSystem):
         file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
         file.delete()
 
+    def cp_file(self, path1: str, path2: str, **kwargs) -> None:
+        # temp file
+        # get_file(path1)
+        # put_file(path2)
+        raise NotImplementedError
+
 
 class WandbFile(AbstractBufferedFile):
     def __init__(
