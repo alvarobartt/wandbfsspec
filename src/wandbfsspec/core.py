@@ -127,6 +127,11 @@ class WandbFileSystem(AbstractFileSystem):
         run = self.api.run(f"{entity}/{project}/{run_id}")
         run.upload_file(path=lpath, root=Path(filepath).parents[0].as_posix())
 
+    def get_file(self, lpath: str, rpath: str, overwrite: bool = False, **kwargs) -> None:
+        entity, project, run_id, filepath = self.split_path(path=rpath)
+        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        file.download(root=lpath, replace=overwrite)
+
 
 class WandbFile(AbstractBufferedFile):
     def __init__(
