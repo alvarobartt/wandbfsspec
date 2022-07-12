@@ -97,7 +97,7 @@ class WandbFileSystem(AbstractFileSystem):
         _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
         if not _file:
             raise ValueError
-        return datetime.datetime.fromisoformat(_file.__dict__["_attrs"]["updatedAt"])
+        return datetime.datetime.fromisoformat(_file.updated_at)
 
     def open(self, path: str, mode: Literal["rb", "wb"] = "rb") -> None:
         _, _, _, filepath = self.split_path(path=path)
@@ -110,7 +110,7 @@ class WandbFileSystem(AbstractFileSystem):
         _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
         if not _file:
             raise ValueError
-        return _file._attrs["directUrl"]
+        return _file.direct_url
 
     def cat_file(
         self, path: str, start: Union[int, None] = None, end: Union[int, None] = None
