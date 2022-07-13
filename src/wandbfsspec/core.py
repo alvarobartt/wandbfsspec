@@ -1,6 +1,8 @@
 # Copyright 2022 Alvaro Bartolome, alvarobartt @ GitHub
 # See LICENSE for details.
 
+import tempfile
+
 import datetime
 import os
 import urllib.request
@@ -55,10 +57,13 @@ class WandbFileSystem(AbstractFileSystem):
         entity, project, run_id, filepath = self.split_path(path=path)
         if entity and project and run_id:
             _files = self.api.run(f"{entity}/{project}/{run_id}").files()
+            base_path = f"{entity}/{project}/{run_id}"
         elif entity and project:
             _files = self.api.runs(f"{entity}/{project}")
+            base_path = f"{entity}/{project}"
         elif entity:
             _files = self.api.projects(entity=entity)
+            base_path = entity
         else:
             return []
         filepath = Path(filepath if filepath else "./")
@@ -70,22 +75,22 @@ class WandbFileSystem(AbstractFileSystem):
             if not run_id or filename.is_dir():
                 files.append(
                     {
-                        "name": f"{entity}/{project}/{run_id}/{_file.name}",
+                        "name": f"{base_path}/{_file.name}",
                         "type": "directory",
                         "size": 0,
                     }
                     if detail
-                    else f"{entity}/{project}/{run_id}/{_file.name}"
+                    else f"{base_path}/{_file.name}"
                 )
                 continue
             files.append(
                 {
-                    "name": f"{entity}/{project}/{run_id}/{_file.name}",
+                    "name": f"{base_path}/{_file.name}",
                     "type": "file",
                     "size": _file.size,
                 }
                 if detail
-                else f"{entity}/{project}/{run_id}/{_file.name}"
+                else f"{base_path}/{_file.name}"
             )
         return files
 
