@@ -6,6 +6,7 @@ import tempfile
 import datetime
 import os
 import urllib.request
+import warnings
 from pathlib import Path
 from typing import List, Literal, Tuple, Union
 
@@ -130,7 +131,13 @@ class WandbFileSystem(AbstractFileSystem):
     def put_file(self, lpath: str, rpath: str, **kwargs) -> None:
         entity, project, run_id, filepath = self.split_path(path=rpath)
         run = self.api.run(f"{entity}/{project}/{run_id}")
-        run.upload_file(path=lpath, root=Path(filepath).parents[0].as_posix())
+        warnings.warn(
+            "`rpath` should be a directory path not a file path, as in order to use"
+            " file paths we'll need to wait upon"
+            " https://github.com/wandb/client/pull/3929 merge",
+            RuntimeWarning,
+        )
+        run.upload_file(path=lpath, root=filepath if filepath else ".")
 
     def get_file(
         self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
