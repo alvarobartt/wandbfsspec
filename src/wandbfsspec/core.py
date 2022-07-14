@@ -152,7 +152,7 @@ class WandbFileSystem(AbstractFileSystem):
 
     def cp_file(self, path1: str, path2: str, **kwargs) -> None:
         warnings.warn(
-            "`rpath` should be a directory path not a file path, as in order to use"
+            "`path2` should be a directory path not a file path, as in order to use"
             " file paths we'll need to wait upon"
             " https://github.com/wandb/client/pull/3924 merge",
             RuntimeWarning,
