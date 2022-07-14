@@ -174,10 +174,3 @@ class WandbFile(AbstractBufferedFile):
         self, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
         return self.fs.cat_file(path=self.path, start=start, end=end)
-
-
-class WandbArtifactStore(AbstractFileSystem):
-    protocol = "wandbas"
-
-    def __init__(self) -> None:
-        super().__init__()
