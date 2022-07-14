@@ -1,10 +1,9 @@
 # Copyright 2022 Alvaro Bartolome, alvarobartt @ GitHub
 # See LICENSE for details.
 
-import tempfile
-
 import datetime
 import os
+import tempfile
 import urllib.request
 import warnings
 from pathlib import Path
@@ -152,10 +151,17 @@ class WandbFileSystem(AbstractFileSystem):
         file.delete()
 
     def cp_file(self, path1: str, path2: str, **kwargs) -> None:
-        # temp file
-        # get_file(path1)
-        # put_file(path2)
-        raise NotImplementedError
+        warnings.warn(
+            "`rpath` should be a directory path not a file path, as in order to use"
+            " file paths we'll need to wait upon"
+            " https://github.com/wandb/client/pull/3924 merge",
+            RuntimeWarning,
+        )
+        # with tempfile.NamedTemporaryFile() as f: f.name
+        with tempfile.TemporaryDirectory() as f:
+            self.get_file(lpath=f, rpath=path1, overwrite=True)
+            _, _, _, filepath = self.split_path(path=path1)
+            self.put_file(lpath=f"{f}/{filepath}", rpath=path2)
 
 
 class WandbFile(AbstractBufferedFile):
@@ -168,3 +174,10 @@ class WandbFile(AbstractBufferedFile):
         self, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
         return self.fs.cat_file(path=self.path, start=start, end=end)
+
+
+class WandbArtifactStore(AbstractFileSystem):
+    protocol = "wandbas"
+
+    def __init__(self) -> None:
+        super().__init__()
