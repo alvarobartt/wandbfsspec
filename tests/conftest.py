@@ -9,7 +9,7 @@ from .utils import MockRun
 
 MOCK_RUN = MockRun(
     entity=os.getenv("WANDB_ENTITY", "alvarobartt"),
-    project=os.getenv("WANDB_ENTITY", "wandbfsspec-tests"),
+    project=os.getenv("WANDB_PROJECT", "wandbfsspec-tests"),
 )
 
 

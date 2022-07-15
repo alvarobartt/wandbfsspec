@@ -4,11 +4,11 @@
 import os
 from typing import Union
 
-import wandb
 from pydantic.dataclasses import dataclass
 
-PARENT_PATH = os.path.dirname(os.path.abspath(__file__))
-DATA_PATH = os.path.abspath("data")
+import wandb
+
+DATA_PATH = os.path.abspath("tests/data")
 FILE_PATH = os.path.join(DATA_PATH, "file.yaml")
 FILES_DIR = os.path.join(DATA_PATH, "files")
 
@@ -29,7 +29,9 @@ class MockRun:
 
         assert wandb.run is None
 
-        wandb.init(name=self.run_name, dir=PARENT_PATH)
+        wandb.init(
+            entity=self.entity, project=self.project, name=self.run_name, dir="/"
+        )
         assert wandb.run is not None
 
         assert wandb.run._entity == self.entity
