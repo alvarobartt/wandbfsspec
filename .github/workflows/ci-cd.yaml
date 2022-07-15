@@ -22,7 +22,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
 
-      - name: style
+      - name: quality
         run: poetry run make quality
 
   run-tests:
