@@ -9,14 +9,14 @@ import pytest
 from wandbfsspec.core import WandbFile, WandbFileSystem
 
 
-@pytest.mark.usefixtures("entity", "project", "run_id")
 class TestWandbFileSystem:
     """Test `wandbfsspec.core.WandbFileSystem` class methods."""
 
     @pytest.fixture(autouse=True)
-    def setup_method(self) -> None:
+    @pytest.mark.usefixtures("entity", "project", "run_id")
+    def setup_method(self, entity: str, project: str, run_id: str) -> None:
         self.fs = WandbFileSystem()
-        self.path = f"{self.fs.protocol}://{self.entity}/{self.project}/{self.run_id}"
+        self.path = f"{self.fs.protocol}://{entity}/{project}/{run_id}"
 
     def teardown(self):
         del self.fs
