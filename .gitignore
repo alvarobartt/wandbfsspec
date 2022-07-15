@@ -115,3 +115,8 @@ venv.bak/
 
 # Poetry
 *poetry.lock*
+
+# Weights and Biases (wandb)
+wandb
+wandb/
+wandb/*
