@@ -9,10 +9,9 @@ import warnings
 from pathlib import Path
 from typing import List, Literal, Tuple, Union
 
+import wandb
 from fsspec import AbstractFileSystem
 from fsspec.spec import AbstractBufferedFile
-
-import wandb
 
 MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
 

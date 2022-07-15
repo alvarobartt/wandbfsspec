@@ -4,9 +4,8 @@
 import os
 from typing import Union
 
-from pydantic.dataclasses import dataclass
-
 import wandb
+from pydantic.dataclasses import dataclass
 
 DATA_PATH = os.path.abspath("tests/data")
 FILE_PATH = os.path.join(DATA_PATH, "file.yaml")
