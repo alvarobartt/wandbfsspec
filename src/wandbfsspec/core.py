@@ -13,7 +13,7 @@ import wandb
 from fsspec import AbstractFileSystem
 from fsspec.spec import AbstractBufferedFile
 
-MAX_PATH_LENGTH_WITHOUT_FILEPATH = 3
+MAX_PATH_LENGTH_WITHOUT_FILE_PATH = 3
 
 
 class WandbFileSystem(AbstractFileSystem):
@@ -45,66 +45,78 @@ class WandbFileSystem(AbstractFileSystem):
         if "/" not in path:
             return (path, None, None, None)
         path = path.split("/")
-        if len(path) > MAX_PATH_LENGTH_WITHOUT_FILEPATH:
+        if len(path) > MAX_PATH_LENGTH_WITHOUT_FILE_PATH:
             return (
-                *path[:MAX_PATH_LENGTH_WITHOUT_FILEPATH],
-                "/".join(path[MAX_PATH_LENGTH_WITHOUT_FILEPATH:]),
+                *path[:MAX_PATH_LENGTH_WITHOUT_FILE_PATH],
+                "/".join(path[MAX_PATH_LENGTH_WITHOUT_FILE_PATH:]),
             )
-        path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
+        path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILE_PATH - len(path))
         return (*path, None)
 
     def ls(self, path: str, detail: bool = False) -> Union[List[str], Dict[str, Any]]:
-        entity, project, run_id, filepath = self.split_path(path=path)
+        entity, project, run_id, file_path = self.split_path(path=path)
         if entity and project and run_id:
             _files = self.api.run(f"{entity}/{project}/{run_id}").files()
+            base_path = f"{entity}/{project}/{run_id}"
             return self.__ls_files(
                 _files=_files,
-                filepath=filepath if filepath else Path("./"),
+                base_path=f"{base_path}/{file_path}" if file_path else base_path,
+                file_path=file_path if file_path else Path("./"),
                 detail=detail,
             )
         elif entity and project:
             _files = self.api.runs(f"{entity}/{project}")
-            return self.__ls_projects_or_runs(_files)
+            base_path = f"{entity}/{project}"
+            return self.__ls_projects_or_runs(
+                _files=_files, base_path=base_path, detail=detail
+            )
         elif entity:
             _files = self.api.projects(entity=entity)
-            return self.__ls_projects_or_runs(_files)
+            base_path = entity
+            return self.__ls_projects_or_runs(
+                _files=_files, base_path=base_path, detail=detail
+            )
         return []
 
     @staticmethod
     def __ls_files(
-        _files: List[str], filepath: Union[str, Path] = Path("./"), detail: bool = False
+        _files: List[str],
+        base_path: Union[str, Path],
+        file_path: Union[str, Path] = Path("./"),
+        detail: bool = False,
     ) -> Union[List[str], Dict[str, Any]]:
-        filepath = Path(filepath) if isinstance(filepath, str) else filepath
+        file_path = Path(file_path) if isinstance(file_path, str) else file_path
         files = []
         for _file in _files:
-            if filepath not in Path(_file.name).parents:
+            if file_path not in Path(_file.name).parents:
                 continue
-            filename = Path(_file.name.replace(f"{filepath.as_posix()}/", ""))
+            filename = Path(_file.name.replace(f"{file_path.as_posix()}/", ""))
             if filename.is_dir() or len(filename.parents) > 1:
+                filename = filename.parent
                 if (
-                    any(f["name"] == filename.parent.as_posix() for f in files)
+                    any(f["name"] == f"{base_path}/{filename.name}" for f in files)
                     if detail
-                    else filename.parent.as_posix() in files
+                    else f"{base_path}/{filename.name}" in files
                 ):
                     continue
                 files.append(
                     {
-                        "name": filename.parent.as_posix(),
+                        "name": f"{base_path}/{filename.name}",
                         "type": "directory",
                         "size": 0,
                     }
                     if detail
-                    else filename.parent.as_posix()
+                    else f"{base_path}/{filename.name}"
                 )
                 continue
             files.append(
                 {
-                    "name": filename.name,
+                    "name": f"{base_path}/{filename.name}",
                     "type": "file",
                     "size": _file.size,
                 }
                 if detail
-                else filename.name
+                else f"{base_path}/{filename.name}"
             )
         return files
 
@@ -127,23 +139,23 @@ class WandbFileSystem(AbstractFileSystem):
 
     def modified(self, path: str) -> datetime.datetime:
         """Return the modified timestamp of a file as a datetime.datetime"""
-        entity, project, run_id, filepath = self.split_path(path=path)
-        if not filepath:
+        entity, project, run_id, file_path = self.split_path(path=path)
+        if not file_path:
             raise ValueError
-        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
         if not _file:
             raise ValueError
         return datetime.datetime.fromisoformat(_file.updated_at)
 
     def open(self, path: str, mode: Literal["rb", "wb"] = "rb") -> None:
-        _, _, _, filepath = self.split_path(path=path)
-        if not filepath:
+        _, _, _, file_path = self.split_path(path=path)
+        if not file_path:
             raise ValueError
         return WandbFile(self, path=path, mode=mode)
 
     def url(self, path: str) -> str:
-        entity, project, run_id, filepath = self.split_path(path=path)
-        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        entity, project, run_id, file_path = self.split_path(path=path)
+        _file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
         if not _file:
             raise ValueError
         return _file.direct_url
@@ -159,7 +171,7 @@ class WandbFileSystem(AbstractFileSystem):
         return urllib.request.urlopen(req).read()
 
     def put_file(self, lpath: str, rpath: str, **kwargs) -> None:
-        entity, project, run_id, filepath = self.split_path(path=rpath)
+        entity, project, run_id, file_path = self.split_path(path=rpath)
         run = self.api.run(f"{entity}/{project}/{run_id}")
         warnings.warn(
             "`rpath` should be a directory path not a file path, as in order to use"
@@ -167,18 +179,18 @@ class WandbFileSystem(AbstractFileSystem):
             " https://github.com/wandb/client/pull/3929 merge",
             RuntimeWarning,
         )
-        run.upload_file(path=lpath, root=filepath if filepath else ".")
+        run.upload_file(path=lpath, root=file_path if file_path else ".")
 
     def get_file(
         self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
     ) -> None:
-        entity, project, run_id, filepath = self.split_path(path=rpath)
-        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        entity, project, run_id, file_path = self.split_path(path=rpath)
+        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
         file.download(root=lpath, replace=overwrite)
 
     def rm_file(self, path: str) -> None:
-        entity, project, run_id, filepath = self.split_path(path=path)
-        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=filepath)
+        entity, project, run_id, file_path = self.split_path(path=path)
+        file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
         file.delete()
 
     def cp_file(self, path1: str, path2: str, **kwargs) -> None:
@@ -191,8 +203,8 @@ class WandbFileSystem(AbstractFileSystem):
         # with tempfile.NamedTemporaryFile() as f: f.name
         with tempfile.TemporaryDirectory() as f:
             self.get_file(lpath=f, rpath=path1, overwrite=True)
-            _, _, _, filepath = self.split_path(path=path1)
-            self.put_file(lpath=f"{f}/{filepath}", rpath=path2)
+            _, _, _, file_path = self.split_path(path=path1)
+            self.put_file(lpath=f"{f}/{file_path}", rpath=path2)
 
 
 class WandbFile(AbstractBufferedFile):
