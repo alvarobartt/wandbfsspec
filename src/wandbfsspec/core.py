@@ -7,7 +7,7 @@ import tempfile
 import urllib.request
 import warnings
 from pathlib import Path
-from typing import List, Literal, Tuple, Union
+from typing import Any, Dict, List, Literal, Tuple, Union
 
 import wandb
 from fsspec import AbstractFileSystem
@@ -53,44 +53,75 @@ class WandbFileSystem(AbstractFileSystem):
         path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
         return (*path, None)
 
-    def ls(self, path: str, detail: bool = False) -> List[str]:
+    def ls(self, path: str, detail: bool = False) -> Union[List[str], Dict[str, Any]]:
         entity, project, run_id, filepath = self.split_path(path=path)
         if entity and project and run_id:
             _files = self.api.run(f"{entity}/{project}/{run_id}").files()
-            base_path = f"{entity}/{project}/{run_id}"
+            return self.__ls_files(
+                _files=_files,
+                filepath=filepath if filepath else Path("./"),
+                detail=detail,
+            )
         elif entity and project:
             _files = self.api.runs(f"{entity}/{project}")
-            base_path = f"{entity}/{project}"
+            return self.__ls_projects_or_runs(_files)
         elif entity:
             _files = self.api.projects(entity=entity)
-            base_path = entity
-        else:
-            return []
-        filepath = Path(filepath if filepath else "./")
+            return self.__ls_projects_or_runs(_files)
+        return []
+
+    @staticmethod
+    def __ls_files(
+        _files: List[str], filepath: Union[str, Path] = Path("./"), detail: bool = False
+    ) -> Union[List[str], Dict[str, Any]]:
+        filepath = Path(filepath) if isinstance(filepath, str) else filepath
         files = []
         for _file in _files:
-            filename = Path(_file.name)
-            if filepath not in filename.parents:
+            if filepath not in Path(_file.name).parents:
                 continue
-            if not run_id or filename.is_dir():
+            filename = Path(_file.name.replace(f"{filepath.as_posix()}/", ""))
+            if filename.is_dir() or len(filename.parents) > 1:
+                if (
+                    any(f["name"] == filename.parent.as_posix() for f in files)
+                    if detail
+                    else filename.parent.as_posix() in files
+                ):
+                    continue
                 files.append(
                     {
-                        "name": f"{base_path}/{_file.name}",
+                        "name": filename.parent.as_posix(),
                         "type": "directory",
                         "size": 0,
                     }
                     if detail
-                    else f"{base_path}/{_file.name}"
+                    else filename.parent.as_posix()
                 )
                 continue
             files.append(
                 {
-                    "name": f"{base_path}/{_file.name}",
+                    "name": filename.name,
                     "type": "file",
                     "size": _file.size,
                 }
                 if detail
-                else f"{base_path}/{_file.name}"
+                else filename.name
+            )
+        return files
+
+    @staticmethod
+    def __ls_projects_or_runs(
+        _files: List[str], detail: bool = False
+    ) -> Union[List[str], Dict[str, Any]]:
+        files = []
+        for _file in _files:
+            files.append(
+                {
+                    "name": _file.name,
+                    "type": "directory",
+                    "size": 0,
+                }
+                if detail
+                else _file.name
             )
         return files
 
