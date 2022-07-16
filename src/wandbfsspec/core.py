@@ -53,7 +53,7 @@ class WandbFileSystem(AbstractFileSystem):
         path += [None] * (MAX_PATH_LENGTH_WITHOUT_FILEPATH - len(path))
         return (*path, None)
 
-    def ls(self, path: str, detail: bool = True) -> List[str]:
+    def ls(self, path: str, detail: bool = False) -> List[str]:
         entity, project, run_id, filepath = self.split_path(path=path)
         if entity and project and run_id:
             _files = self.api.run(f"{entity}/{project}/{run_id}").files()

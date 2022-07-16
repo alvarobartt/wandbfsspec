@@ -39,7 +39,7 @@ Here's an example on how to locate and open a file:
 ```python
 >>> from wandbfsspec.core import WandbFileSystem
 >>> fs = WandbFileSystem(api_key="YOUR_API_KEY")
->>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp", detail=False)
+>>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp")
 ['alvarobartt/wandbfsspec-tests/3s6km7mp/config.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-1.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-2.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-3.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/output.log', 'alvarobartt/wandbfsspec-tests/3s6km7mp/requirements.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-metadata.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-summary.json']
 >>> with fs.open("alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml", "rb") as f:
 ...     print(f.read())
@@ -51,7 +51,7 @@ b'some: data\nfor: testing'
 ```python
 >>> import fsspec
 >>> fs = fsspec.filesystem("wandbfs")
->>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp", detail=False)
+>>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp")
 ['alvarobartt/wandbfsspec-tests/3s6km7mp/config.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-1.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-2.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files/file-3.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/output.log', 'alvarobartt/wandbfsspec-tests/3s6km7mp/requirements.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-metadata.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-summary.json']
 >>> with fs.open("alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml", "rb") as f:
 ...     print(f.read())
