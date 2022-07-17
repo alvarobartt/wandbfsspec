@@ -217,3 +217,24 @@ class WandbFile(AbstractBufferedFile):
         self, start: Union[int, None] = None, end: Union[int, None] = None
     ) -> bytes:
         return self.fs.cat_file(path=self.path, start=start, end=end)
+
+
+class WandbArtifactStore(AbstractFileSystem):
+    protocol = "wandbas"
+
+    def __init__(
+        self,
+        api_key: Union[str, None] = None,
+    ) -> None:
+        super().__init__()
+
+        if api_key:
+            os.environ["WANDB_API_KEY"] = api_key
+
+        assert os.getenv("WANDB_API_KEY"), (
+            "In order to connect to the wandb Public API you need to provide the API"
+            " key either via param `api_key`, setting the key in the environment"
+            " variable `WANDB_API_KEY`, or running `wandb login <WANDB_API_KEY>`."
+        )
+
+        self.api = wandb.Api()
