@@ -8,6 +8,9 @@ on:
       - .github/workflows/ci-cd.yaml
       - src/**
       - tests/**
+  release:
+    types:
+      - published
 
 jobs:
   check-quality:
@@ -46,3 +49,26 @@ jobs:
         run: poetry run make tests
         env:
           WANDB_API_KEY: ${{ secrets.WANDB_API_KEY }}
+
+  publish-package:
+    needs: run-tests
+    if: github.event_name == 'release'
+
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/alvarobartt/wandbfsspec:main
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+      
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: publish-package
+      run: poetry publish --build
+
+    - name: config-pypi
+      run: poetry config pypi-token.pypi $WANDBFSSPEC_PYPI_TOKEN
+      env:
+        WANDBFSSPEC_PYPI_TOKEN: ${{ secrets.WANDBFSSPEC_PYPI_TOKEN }}
