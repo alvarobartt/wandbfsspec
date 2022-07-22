@@ -88,25 +88,23 @@ class WandbFileSystem(AbstractFileSystem):
         file_path = Path(file_path) if isinstance(file_path, str) else file_path
         files = []
         for _file in _files:
-            if file_path not in Path(_file.name).parents:
+            filename = Path(_file.name)
+            if file_path not in filename.parents:
                 continue
-            filename = Path(_file.name.replace(f"{file_path.as_posix()}/", ""))
-            if filename.is_dir() or len(filename.parents) > 1:
-                filename = filename.parent
-                if (
-                    any(f["name"] == f"{base_path}/{filename.name}" for f in files)
-                    if detail
-                    else f"{base_path}/{filename.name}" in files
-                ):
+            filename_strip = Path(_file.name.replace(f"{file_path}/", ""))
+            if filename_strip.is_dir() or len(filename_strip.parents) > 1:
+                filename_strip = filename_strip.parent.as_posix().split("/")[0]
+                path = f"{base_path}/{filename_strip}"
+                if any(f["name"] == path for f in files) if detail else path in files:
                     continue
                 files.append(
                     {
-                        "name": f"{base_path}/{filename.name}",
+                        "name": path,
                         "type": "directory",
                         "size": 0,
                     }
                     if detail
-                    else f"{base_path}/{filename.name}"
+                    else path
                 )
                 continue
             files.append(
