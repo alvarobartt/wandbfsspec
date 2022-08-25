@@ -173,11 +173,20 @@ class WandbFileSystem(AbstractFileSystem):
         run.upload_file(path=lpath, root=file_path if file_path else ".")
 
     def get_file(
-        self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
+        self, rpath: str, lpath: str, overwrite: bool = False, **kwargs
     ) -> None:
+        if os.path.splitext(rpath)[1] == "":
+            raise ValueError("`rpath` must be a file path with extension!")
         entity, project, run_id, file_path = self.split_path(path=rpath)
         file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
+        _lpath = lpath
+        if os.path.splitext(lpath)[1] != "":
+            lpath = os.path.dirname(lpath)
         file.download(root=lpath, replace=overwrite)
+        src_path = os.path.abspath(f"{lpath}/{rpath.split('/')[-1]}")
+        tgt_path = os.path.abspath(_lpath)
+        if src_path != tgt_path and not os.path.isdir(tgt_path):
+            os.rename(src_path, tgt_path)
 
     def rm_file(self, path: str) -> None:
         entity, project, run_id, file_path = self.split_path(path=path)
