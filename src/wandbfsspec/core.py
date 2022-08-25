@@ -168,9 +168,23 @@ class WandbFileSystem(AbstractFileSystem):
         return urllib.request.urlopen(req).read()
 
     def put_file(self, lpath: str, rpath: str, **kwargs) -> None:
+        lpath_ext = os.path.splitext(lpath)[1]
+        if lpath_ext == "":
+            raise ValueError("`lpath` must be a file path with extension!")
+        rpath_ext = os.path.splitext(rpath)[1]
+        if rpath_ext != "" and rpath_ext != lpath_ext:
+            raise ValueError(
+                "`lpath` and `rpath` extensions must match if those are file paths!"
+            )
+        lpath = os.path.abspath(lpath)
+        _lpath = lpath
         entity, project, run_id, file_path = self.split_path(path=rpath)
+        if rpath_ext != "":
+            _lpath = os.path.abspath(file_path)
+            os.makedirs(os.path.dirname(_lpath), exist_ok=True)
+            os.replace(lpath, _lpath)
         run = self.api.run(f"{entity}/{project}/{run_id}")
-        run.upload_file(path=lpath, root=file_path if file_path else ".")
+        run.upload_file(path=_lpath, root=".")
 
     def get_file(
         self, rpath: str, lpath: str, overwrite: bool = False, **kwargs
