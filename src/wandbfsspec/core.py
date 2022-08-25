@@ -194,6 +194,14 @@ class WandbFileSystem(AbstractFileSystem):
         file.delete()
 
     def cp_file(self, path1: str, path2: str, **kwargs) -> None:
+        path1_ext = os.path.splitext(path1)[1]
+        if path1_ext == "":
+            raise ValueError(f"Path {path1} must be a file path with extension!")
+        path2_ext = os.path.splitext(path2)[1]
+        if path2_ext == "":
+            raise ValueError(f"Path {path1} must be a file path with extension!")
+        if path1_ext != path2_ext:
+            raise ValueError("Path extensions must be the same for both parameters!")
         with tempfile.TemporaryDirectory() as f:
             self.get_file(lpath=f, rpath=path1, overwrite=True)
             _, _, _, file_path = self.split_path(path=path1)
