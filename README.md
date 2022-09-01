@@ -29,9 +29,6 @@ will implement a new `AbstractFileSystem` class named `WandbArtifactStore` with 
 
 Some more notes on how to actually use `wandb`'s artifact store at https://docs.wandb.ai/guides/artifacts.
 
-Once that's done, we'll fill a PR in https://github.com/fsspec/filesystem_spec, so as to
-register both protocols supported by `wandbfsspec`: `wandbfs` and `wandbas`.
-
 ## 🚸 Usage
 
 Here's an example on how to locate and open a file:
