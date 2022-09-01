@@ -257,3 +257,42 @@ class WandbArtifactStore(AbstractFileSystem):
         path += [None] * (MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH - len(path))
         return (*path, None)
 
+    def ls(self, path: str, detail: bool = False) -> Union[List[str], Dict[str, Any]]:
+        (
+            entity,
+            project,
+            artifact_type,
+            artifact_name,
+            artifact_version,
+            _,
+        ) = self.split_path(path=path)
+        if entity and project and artifact_type and artifact_name and artifact_version:
+            return [
+                f"{entity}/{project}/{artifact_type}/{artifact_name}/{artifact_version}/{f.name}"
+                for f in self.api.artifact(
+                    name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
+                    type=artifact_type,
+                )._files()
+            ]
+        elif entity and project and artifact_type and artifact_name:
+            return [
+                f"{entity}/{project}/{artifact_type}/{artifact_name}/{v.name.split(':')[1]}"
+                for v in self.api.artifact_versions(
+                    name=f"{entity}/{project}/{artifact_name}", type_name=artifact_type
+                )
+            ]
+        elif entity and project and artifact_type:
+            return [
+                f"{entity}/{project}/{artifact_type}/{c.name}"
+                for c in self.api.artifact_type(
+                    project=f"{entity}/{project}", type_name=artifact_type
+                ).collections()
+            ]
+        elif entity and project:
+            return [
+                f"{entity}/{project}/{a.name}"
+                for a in self.api.artifact_types(project=f"{entity}/{project}")
+            ]
+        elif entity:
+            return [f"{entity}/{p.name}" for p in self.api.projects(entity=entity)]
+        return []
