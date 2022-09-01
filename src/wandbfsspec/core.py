@@ -14,6 +14,7 @@ from fsspec import AbstractFileSystem
 from fsspec.spec import AbstractBufferedFile
 
 MAX_PATH_LENGTH_WITHOUT_FILE_PATH = 3
+MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH = 5
 
 
 class WandbFileSystem(AbstractFileSystem):
@@ -238,3 +239,21 @@ class WandbArtifactStore(AbstractFileSystem):
         )
 
         self.api = wandb.Api()
+
+    @classmethod
+    def split_path(
+        self, path: str
+    ) -> Tuple[str, Union[str, None], Union[str, None], Union[str, None]]:
+        path = self._strip_protocol(path=path)
+        path = path.lstrip("/")
+        if "/" not in path:
+            return (path, *[None] * MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH)
+        path = path.split("/")
+        if len(path) > MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH:
+            return (
+                *path[:MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH],
+                "/".join(path[MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH:]),
+            )
+        path += [None] * (MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH - len(path))
+        return (*path, None)
+
