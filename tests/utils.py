@@ -47,5 +47,9 @@ class MockRun:
         files = [os.path.relpath(file, f"{wandb.run.dir}/files") for file in files]
         assert all(file in files for file in os.listdir(FILES_DIR))
 
+        artifact = wandb.Artifact("files", type="dataset")
+        artifact.add_dir(DATA_PATH)
+        wandb.log_artifact(artifact)
+
         wandb.finish()
         assert wandb.run is None
