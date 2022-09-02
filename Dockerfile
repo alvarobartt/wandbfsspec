@@ -6,7 +6,7 @@ RUN apt-get update \
 ENV PYTHONUNBUFFERED=1
 
 RUN python -m pip install pip --upgrade \
-    && python -m pip install poetry \
+    && python -m pip install poetry==1.1.15 \
     && python -m poetry config virtualenvs.create false
 
 COPY . .
