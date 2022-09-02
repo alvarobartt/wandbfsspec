@@ -296,3 +296,39 @@ class WandbArtifactStore(AbstractFileSystem):
         elif entity:
             return [f"{entity}/{p.name}" for p in self.api.projects(entity=entity)]
         return []
+
+    def created(self, path: str) -> datetime.datetime:
+        """Return the created timestamp of a file as a datetime.datetime"""
+        (
+            entity,
+            project,
+            artifact_type,
+            artifact_name,
+            artifact_version,
+            _,
+        ) = self.split_path(path=path)
+        artifact = self.api.artifact(
+            name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
+            type=artifact_type,
+        )
+        if not artifact:
+            raise ValueError
+        return datetime.datetime.fromisoformat(artifact.created_at)
+
+    def modified(self, path: str) -> datetime.datetime:
+        """Return the modified timestamp of a file as a datetime.datetime"""
+        (
+            entity,
+            project,
+            artifact_type,
+            artifact_name,
+            artifact_version,
+            _,
+        ) = self.split_path(path=path)
+        artifact = self.api.artifact(
+            name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
+            type=artifact_type,
+        )
+        if not artifact:
+            raise ValueError
+        return datetime.datetime.fromisoformat(artifact.updated_at)
