@@ -16,6 +16,8 @@ from fsspec.spec import AbstractBufferedFile
 MAX_PATH_LENGTH_WITHOUT_FILE_PATH = 3
 MAX_ARTIFACT_LENGTH_WITHOUT_FILE_PATH = 5
 
+__all__ = ["WandbFileSystem", "WandbArtifactStore"]
+
 
 class WandbFileSystem(AbstractFileSystem):
     protocol = "wandbfs"
