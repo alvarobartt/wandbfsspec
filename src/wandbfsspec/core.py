@@ -334,3 +334,23 @@ class WandbArtifactStore(AbstractFileSystem):
         if not artifact:
             raise ValueError
         return datetime.datetime.fromisoformat(artifact.updated_at)
+
+    def get_file(
+        self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
+    ) -> None:
+        (
+            entity,
+            project,
+            artifact_type,
+            artifact_name,
+            artifact_version,
+            file_path,
+        ) = self.split_path(path=rpath)
+        artifact = self.api.artifact(
+            name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
+            type=artifact_type,
+        )
+        path = artifact.get_path(name=file_path)
+        if os.path.exists(lpath) and not overwrite:
+            return
+        path.download(root=lpath)
