@@ -5,7 +5,6 @@ import datetime
 import os
 import tempfile
 import urllib.request
-import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Tuple, Union
 
@@ -91,25 +90,23 @@ class WandbFileSystem(AbstractFileSystem):
         file_path = Path(file_path) if isinstance(file_path, str) else file_path
         files = []
         for _file in _files:
-            if file_path not in Path(_file.name).parents:
+            filename = Path(_file.name)
+            if file_path not in filename.parents:
                 continue
-            filename = Path(_file.name.replace(f"{file_path.as_posix()}/", ""))
-            if filename.is_dir() or len(filename.parents) > 1:
-                filename = filename.parent
-                if (
-                    any(f["name"] == f"{base_path}/{filename.name}" for f in files)
-                    if detail
-                    else f"{base_path}/{filename.name}" in files
-                ):
+            filename_strip = Path(_file.name.replace(f"{file_path}/", ""))
+            if filename_strip.is_dir() or len(filename_strip.parents) > 1:
+                filename_strip = filename_strip.parent.as_posix().split("/")[0]
+                path = f"{base_path}/{filename_strip}"
+                if any(f["name"] == path for f in files) if detail else path in files:
                     continue
                 files.append(
                     {
-                        "name": f"{base_path}/{filename.name}",
+                        "name": path,
                         "type": "directory",
                         "size": 0,
                     }
                     if detail
-                    else f"{base_path}/{filename.name}"
+                    else path
                 )
                 continue
             files.append(
@@ -174,22 +171,39 @@ class WandbFileSystem(AbstractFileSystem):
         return urllib.request.urlopen(req).read()
 
     def put_file(self, lpath: str, rpath: str, **kwargs) -> None:
+        lpath_ext = os.path.splitext(lpath)[1]
+        if lpath_ext == "":
+            raise ValueError("`lpath` must be a file path with extension!")
+        rpath_ext = os.path.splitext(rpath)[1]
+        if rpath_ext != "" and rpath_ext != lpath_ext:
+            raise ValueError(
+                "`lpath` and `rpath` extensions must match if those are file paths!"
+            )
+        lpath = os.path.abspath(lpath)
+        _lpath = lpath
         entity, project, run_id, file_path = self.split_path(path=rpath)
+        if rpath_ext != "":
+            _lpath = os.path.abspath(file_path)
+            os.makedirs(os.path.dirname(_lpath), exist_ok=True)
+            os.replace(lpath, _lpath)
         run = self.api.run(f"{entity}/{project}/{run_id}")
-        warnings.warn(
-            "`rpath` should be a directory path not a file path, as in order to use"
-            " file paths we'll need to wait upon"
-            " https://github.com/wandb/client/pull/3929 merge",
-            RuntimeWarning,
-        )
-        run.upload_file(path=lpath, root=file_path if file_path else ".")
+        run.upload_file(path=_lpath, root=".")
 
     def get_file(
-        self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
+        self, rpath: str, lpath: str, overwrite: bool = False, **kwargs
     ) -> None:
+        if os.path.splitext(rpath)[1] == "":
+            raise ValueError("`rpath` must be a file path with extension!")
         entity, project, run_id, file_path = self.split_path(path=rpath)
         file = self.api.run(f"{entity}/{project}/{run_id}").file(name=file_path)
+        _lpath = lpath
+        if os.path.splitext(lpath)[1] != "":
+            lpath = os.path.dirname(lpath)
         file.download(root=lpath, replace=overwrite)
+        src_path = os.path.abspath(f"{lpath}/{rpath.split('/')[-1]}")
+        tgt_path = os.path.abspath(_lpath)
+        if src_path != tgt_path and not os.path.isdir(tgt_path):
+            os.rename(src_path, tgt_path)
 
     def rm_file(self, path: str) -> None:
         entity, project, run_id, file_path = self.split_path(path=path)
@@ -197,13 +211,14 @@ class WandbFileSystem(AbstractFileSystem):
         file.delete()
 
     def cp_file(self, path1: str, path2: str, **kwargs) -> None:
-        warnings.warn(
-            "`path2` should be a directory path not a file path, as in order to use"
-            " file paths we'll need to wait upon"
-            " https://github.com/wandb/client/pull/3924 merge",
-            RuntimeWarning,
-        )
-        # with tempfile.NamedTemporaryFile() as f: f.name
+        path1_ext = os.path.splitext(path1)[1]
+        if path1_ext == "":
+            raise ValueError(f"Path {path1} must be a file path with extension!")
+        path2_ext = os.path.splitext(path2)[1]
+        if path2_ext == "":
+            raise ValueError(f"Path {path1} must be a file path with extension!")
+        if path1_ext != path2_ext:
+            raise ValueError("Path extensions must be the same for both parameters!")
         with tempfile.TemporaryDirectory() as f:
             self.get_file(lpath=f, rpath=path1, overwrite=True)
             _, _, _, file_path = self.split_path(path=path1)
