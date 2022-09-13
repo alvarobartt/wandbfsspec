@@ -348,17 +348,10 @@ class WandbArtifactStore(AbstractFileSystem):
             name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
             type=artifact_type,
         )
-        entity = artifact.entity
-        path = artifact.get_path(name=file_path)
-        manifest = path._parent_artifact._load_manifest()
-        policy = manifest.storage_policy
-        response = policy._session.get(
-            policy._file_url(policy._api, entity, manifest.entries[path.name]),
-            auth=("api", os.getenv("WANDB_API_KEY")),
-            stream=True,
-        )
-        response.raise_for_status()
-        return response.url
+        manifest = artifact._load_manifest()
+        digest = manifest.entries[file_path].digest
+        digest_id = wandb.util.b64_to_hex_id(digest)
+        return f"https://api.wandb.ai/artifactsV2/gcp-us/{artifact.entity}/{artifact.id}/{digest_id}"
 
     def get_file(
         self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
