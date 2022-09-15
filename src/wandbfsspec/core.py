@@ -1,9 +1,8 @@
 # Copyright 2022 Alvaro Bartolome, alvarobartt @ GitHub
 # See LICENSE for details.
 
-import logging
-
 import datetime
+import logging
 import os
 import tempfile
 import urllib.request
@@ -417,12 +416,17 @@ class WandbArtifactStore(AbstractFileSystem):
         ) = self.split_path(path=path)
         if not file_path:
             if not force_rm:
-                logging.info("In order to remove an artifact, you'll need to pass `force_rm=True`.")
+                logging.info(
+                    "In order to remove an artifact, you'll need to pass"
+                    " `force_rm=True`."
+                )
                 return
             artifact = self.api.artifact(
                 name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
                 type=artifact_type,
             )
             artifact.delete()
-        logging.info("W&B just lets you remove complete artifact versions not artifact files.")
+        logging.info(
+            "W&B just lets you remove complete artifact versions not artifact files."
+        )
         return
