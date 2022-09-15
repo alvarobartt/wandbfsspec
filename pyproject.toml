@@ -5,13 +5,9 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry]
 name = "wandbfsspec"
 version = "0.2.0"
-packages = [
-    { include = "wandbfsspec", from = "src" },
-]
+packages = [{ include = "wandbfsspec", from = "src" }]
 description = "fsspec interface for Weights & Biases (wandb)"
-authors = [
-    "Alvaro Bartolome <alvarobartt@yahoo.com>"
-]
+authors = ["Alvaro Bartolome <alvarobartt@yahoo.com>"]
 readme = "README.md"
 homepage = "https://github.com/alvarobartt/wandbfsspec"
 documentation = "https://github.com/alvarobartt/wandbfsspec"
@@ -55,3 +51,8 @@ warn_return_any = true
 implicit_reexport = false
 strict_equality = true
 # --strict end
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "INFO"
+log_cli_format = "%(levelname)s: %(message)s"
