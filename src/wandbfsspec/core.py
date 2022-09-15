@@ -350,6 +350,12 @@ class WandbArtifactStore(AbstractFileSystem):
             raise ValueError
         return datetime.datetime.fromisoformat(artifact.updated_at)
 
+    def open(self, path: str, mode: Literal["rb", "wb"] = "rb") -> None:
+        _, _, _, file_path = self.split_path(path=path)
+        if not file_path:
+            raise ValueError
+        return WandbFile(self, path=path, mode=mode)
+
     def url(self, path: str) -> str:
         (
             entity,
@@ -367,6 +373,16 @@ class WandbArtifactStore(AbstractFileSystem):
         digest = manifest.entries[file_path].digest
         digest_id = wandb.util.b64_to_hex_id(digest)
         return f"https://api.wandb.ai/artifactsV2/gcp-us/{artifact.entity}/{artifact.id}/{digest_id}"
+
+    def cat_file(
+        self, path: str, start: Union[int, None] = None, end: Union[int, None] = None
+    ) -> bytes:
+        url = self.url(path=path)
+        req = urllib.request.Request(url=url)
+        if not start and not end:
+            start, end = 0, ""
+        req.add_header("Range", f"bytes={start}-{end}")
+        return urllib.request.urlopen(req).read()
 
     def get_file(
         self, lpath: str, rpath: str, overwrite: bool = False, **kwargs
