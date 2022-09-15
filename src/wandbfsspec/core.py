@@ -434,8 +434,8 @@ class WandbArtifactStore(AbstractFileSystem):
                 name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
                 type=artifact_type,
             )
-            artifact.delete()
+            artifact.delete(delete_aliases=True)
+            return
         logging.info(
             "W&B just lets you remove complete artifact versions not artifact files."
         )
-        return
