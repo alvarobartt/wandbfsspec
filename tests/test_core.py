@@ -17,6 +17,7 @@ class TestWandbFileSystem:
     def setup_method(self, entity: str, project: str, run_id: str) -> None:
         self.fs = WandbFileSystem()
         self.path = f"{self.fs.protocol}://{entity}/{project}/{run_id}"
+        self.file_path = "file.yaml"
 
     def teardown(self):
         del self.fs
@@ -27,11 +28,11 @@ class TestWandbFileSystem:
         assert isinstance(files, List)
 
     def test_modified(self) -> None:
-        modified_at = self.fs.modified(path=f"{self.path}/file.yaml")
+        modified_at = self.fs.modified(path=f"{self.path}/{self.file_path}")
         assert isinstance(modified_at, datetime.datetime)
 
     def test_open(self) -> None:
-        _file = self.fs.open(path=f"{self.path}/file.yaml")
+        _file = self.fs.open(path=f"{self.path}/{self.file_path}")
         assert isinstance(_file, WandbFile)
 
 

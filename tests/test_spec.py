@@ -18,6 +18,7 @@ class TestFsspecFileSystem:
     def setup_method(self, entity: str, project: str, run_id: str) -> None:
         self.fs = fsspec.filesystem(WandbFileSystem.protocol)
         self.path = f"{WandbFileSystem.protocol}://{entity}/{project}/{run_id}"
+        self.file_path = "file.yaml"
 
     def teardown(self):
         del self.fs
@@ -29,10 +30,10 @@ class TestFsspecFileSystem:
 
     def test_modified(self) -> None:
         """Test `fsspec.FileSystem.modified` method."""
-        modified_at = self.fs.modified(path=f"{self.path}/file.yaml")
+        modified_at = self.fs.modified(path=f"{self.path}/{self.file_path}")
         assert isinstance(modified_at, datetime.datetime)
 
     def test_open(self) -> None:
         """Test `fsspec.FileSystem.open` method."""
-        with self.fs.open(path=f"{self.path}/file.yaml") as f:
+        with self.fs.open(path=f"{self.path}/{self.file_path}") as f:
             assert isinstance(f, WandbFile)
