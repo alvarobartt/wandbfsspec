@@ -352,7 +352,14 @@ class WandbArtifactStore(AbstractFileSystem):
         return datetime.datetime.fromisoformat(artifact.updated_at)
 
     def open(self, path: str, mode: Literal["rb", "wb"] = "rb") -> None:
-        _, _, _, file_path = self.split_path(path=path)
+        (
+            _,
+            _,
+            _,
+            _,
+            _,
+            file_path,
+        ) = self.split_path(path=path)
         if not file_path:
             raise ValueError
         return WandbFile(self, path=path, mode=mode)
