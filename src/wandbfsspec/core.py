@@ -289,6 +289,12 @@ class WandbArtifactStore(AbstractFileSystem):
         if entity and project and artifact_type and artifact_name and artifact_version:
             return [
                 f"{entity}/{project}/{artifact_type}/{artifact_name}/{artifact_version}/{f.name}"
+                if not detail
+                else {
+                    "name": f"{entity}/{project}/{artifact_type}/{artifact_name}/{artifact_version}/{f.name}",
+                    "type": "file",
+                    "size": f.size,
+                }
                 for f in self.api.artifact(
                     name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
                     type=artifact_type,
@@ -297,6 +303,12 @@ class WandbArtifactStore(AbstractFileSystem):
         elif entity and project and artifact_type and artifact_name:
             return [
                 f"{entity}/{project}/{artifact_type}/{artifact_name}/{v.name.split(':')[1]}"
+                if not detail
+                else {
+                    "name": f"{entity}/{project}/{artifact_type}/{artifact_name}/{v.name.split(':')[1]}",
+                    "type": "directory",
+                    "size": 0,
+                }
                 for v in self.api.artifact_versions(
                     name=f"{entity}/{project}/{artifact_name}", type_name=artifact_type
                 )
@@ -304,6 +316,12 @@ class WandbArtifactStore(AbstractFileSystem):
         elif entity and project and artifact_type:
             return [
                 f"{entity}/{project}/{artifact_type}/{c.name}"
+                if not detail
+                else {
+                    "name": f"{entity}/{project}/{artifact_type}/{c.name}",
+                    "type": "directory",
+                    "size": 0,
+                }
                 for c in self.api.artifact_type(
                     project=f"{entity}/{project}", type_name=artifact_type
                 ).collections()
@@ -311,10 +329,25 @@ class WandbArtifactStore(AbstractFileSystem):
         elif entity and project:
             return [
                 f"{entity}/{project}/{a.name}"
+                if not detail
+                else {
+                    "name": f"{entity}/{project}/{a.name}",
+                    "type": "directory",
+                    "size": 0,
+                }
                 for a in self.api.artifact_types(project=f"{entity}/{project}")
             ]
         elif entity:
-            return [f"{entity}/{p.name}" for p in self.api.projects(entity=entity)]
+            return [
+                f"{entity}/{p.name}"
+                if not detail
+                else {
+                    "name": f"{entity}/{p.name}",
+                    "type": "directory",
+                    "size": 0,
+                }
+                for p in self.api.projects(entity=entity)
+            ]
         return []
 
     def created(self, path: str) -> datetime.datetime:
