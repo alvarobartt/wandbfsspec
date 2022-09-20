@@ -4,4 +4,4 @@
 """`wandbfsspec `: fsspec interface for Weights & Biases (wandb)"""
 
 __author__ = "Alvaro Bartolome, alvarobartt @ GitHub"
-__version__ = "0.1.1"
+__version__ = "0.2.0"

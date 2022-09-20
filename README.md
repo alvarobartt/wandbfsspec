@@ -14,27 +14,15 @@ a File System. Also, `wandb` provides an API that lets you interact with
 that "File System", so this is why `wandbfsspec` makes sense, in order to ease
 that interface between `wandb`'s File System and anyone willing to use it.
 
+Besides the W&B File System, also an Artifact Store is provided, so that
+`wandbfsspec` supports both "file-systems", as for the Artifact Store also an
+API is provided so as to easily interact with the artifacts uploaded to W&B.
+
 The `wandbfsspec` implementation is based on https://github.com/fsspec/filesystem_spec.
-
-## 🔮 Future TODOs
-
-Obviously, since `wandb`'s main purpose is to track and monitor ML experiments,
-it contains an artifact store, so as to dump there the experiment artifacts for data
-versioning and model tracking. More information in https://wandb.ai/site/artifacts.
-
-So on, a new interface will be implemented in `wandbfsspec` not just to handle the files
-that can be uploaded/downloaded to/from `wandb`, but also the artifacts. So the next release
-will implement a new `AbstractFileSystem` class named `WandbArtifactStore` with the protocol
-`wandbas` in order to access the artifact store as if it was a default File System.
-
-Some more notes on how to actually use `wandb`'s artifact store at https://docs.wandb.ai/guides/artifacts.
-
-Once that's done, we'll fill a PR in https://github.com/fsspec/filesystem_spec, so as to
-register both protocols supported by `wandbfsspec`: `wandbfs` and `wandbas`.
 
 ## 🚸 Usage
 
-Here's an example on how to locate and open a file:
+Here's an example on how to locate and open a file from the File System:
 
 ```python
 >>> from wandbfsspec.core import WandbFileSystem
@@ -46,11 +34,22 @@ Here's an example on how to locate and open a file:
 b'some: data\nfor: testing'
 ```
 
+Which is similar to how to locate and open a file from the Artifact Storage (just changing the class and the path):
+
+```python
+>>> from wandbfsspec.core import WandbArtifactStore
+>>> fs = WandbArtifactStore(api_key="YOUR_API_KEY")
+>>> fs.ls("wandb/yolo-chess/model/run_1dnrszzr_model/v8")
+['wandb/yolo-chess/model/run_1dnrszzr_model/v8/last.pt']
+>>> with fs.open("wandb/yolo-chess/model/run_1dnrszzr_model/v8/last.pt", "rb") as f:
+...     print(f.read())
+```
+
 📌 Note that it can also be done through `fsspec` as long as `wandbfsspec` is installed:
 
 ```python
 >>> import fsspec
->>> fs = fsspec.filesystem("wandbfs")
+>>> fs = fsspec.filesystem("wandbfs") # OR fs = fsspec.filesystem("wandbas")
 >>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp")
 ['alvarobartt/wandbfsspec-tests/3s6km7mp/config.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files', 'alvarobartt/wandbfsspec-tests/3s6km7mp/output.log', 'alvarobartt/wandbfsspec-tests/3s6km7mp/requirements.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-metadata.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-summary.json']
 >>> with fs.open("alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml", "rb") as f:

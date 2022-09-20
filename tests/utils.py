@@ -18,6 +18,9 @@ class MockRun:
     project: str
     run_name: Union[str, None] = None
     run_id: Union[str, None] = None
+    artifact_type: Union[str, None] = None
+    artifact_name: Union[str, None] = None
+    artifact_version: Union[str, None] = None
 
     def __post_init__(self):
         assert os.getenv("WANDB_API_KEY"), (
@@ -46,6 +49,15 @@ class MockRun:
         files = wandb.save(glob_str=f"{FILES_DIR}/*", base_path=DATA_PATH, policy="now")
         files = [os.path.relpath(file, f"{wandb.run.dir}/files") for file in files]
         assert all(file in files for file in os.listdir(FILES_DIR))
+
+        artifact = wandb.Artifact("files", type="dataset")
+        artifact.add_dir(DATA_PATH)
+        wandb.log_artifact(artifact)
+        artifact.wait()
+
+        self.artifact_type = artifact.type
+        self.artifact_name = artifact.name.split(":")[0]
+        self.artifact_version = artifact.version
 
         wandb.finish()
         assert wandb.run is None

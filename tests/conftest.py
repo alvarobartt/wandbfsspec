@@ -26,3 +26,18 @@ def project() -> str:
 @pytest.fixture
 def run_id() -> str:
     return MOCK_RUN.run_id
+
+
+@pytest.fixture
+def artifact_type() -> str:
+    return MOCK_RUN.artifact_type
+
+
+@pytest.fixture
+def artifact_name() -> str:
+    return MOCK_RUN.artifact_name
+
+
+@pytest.fixture
+def artifact_version() -> str:
+    return MOCK_RUN.artifact_version
