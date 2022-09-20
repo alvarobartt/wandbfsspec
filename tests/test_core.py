@@ -71,6 +71,10 @@ class TestWandbArtifactStore:
         modified_at = self.fs.modified(path=f"{self.path}/{self.file_path}")
         assert isinstance(modified_at, datetime.datetime)
 
+    def test_open(self) -> None:
+        _file = self.fs.open(path=f"{self.path}/{self.file_path}")
+        assert isinstance(_file, WandbFile)
+
     def test_rm_file(self) -> None:
         self.fs.rm_file(path=self.path)
         self.fs.rm_file(path=self.path, force_rm=True)
