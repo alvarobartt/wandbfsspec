@@ -298,7 +298,7 @@ class WandbArtifactStore(AbstractFileSystem):
                 for f in self.api.artifact(
                     name=f"{entity}/{project}/{artifact_name}:{artifact_version}",
                     type=artifact_type,
-                )._files()
+                ).files()
             ]
         elif entity and project and artifact_type and artifact_name:
             return [
