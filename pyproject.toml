@@ -21,7 +21,7 @@ wandbas = "wandbfsspec.core.WandbArtifactStore"
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
 fsspec = "^2022.5.0"
-wandb = "^0.12.20"
+wandb = "~0.13.3"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
