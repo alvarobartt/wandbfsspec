@@ -4,6 +4,9 @@
 import os
 
 import pytest
+from _pytest.fixtures import SubRequest
+
+from wandbfsspec.spec import WandbArtifactStore, WandbFileSystem
 
 from .utils import MockRun
 
@@ -11,6 +14,11 @@ MOCK_RUN = MockRun(  # type: ignore
     entity=os.getenv("WANDB_ENTITY", "alvarobartt"),
     project=os.getenv("WANDB_PROJECT", "wandbfsspec-tests"),
 )
+
+
+@pytest.fixture(params=[WandbArtifactStore.protocol, WandbFileSystem.protocol])
+def protocol(request: SubRequest) -> str:
+    return request.param  # type: ignore
 
 
 @pytest.fixture
