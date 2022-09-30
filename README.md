@@ -25,7 +25,7 @@ The `wandbfsspec` implementation is based on https://github.com/fsspec/filesyste
 Here's an example on how to locate and open a file from the File System:
 
 ```python
->>> from wandbfsspec.core import WandbFileSystem
+>>> from wandbfsspec.spec import WandbFileSystem
 >>> fs = WandbFileSystem(api_key="YOUR_API_KEY")
 >>> fs.ls("alvarobartt/wandbfsspec-tests/3s6km7mp")
 ['alvarobartt/wandbfsspec-tests/3s6km7mp/config.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/file.yaml', 'alvarobartt/wandbfsspec-tests/3s6km7mp/files', 'alvarobartt/wandbfsspec-tests/3s6km7mp/output.log', 'alvarobartt/wandbfsspec-tests/3s6km7mp/requirements.txt', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-metadata.json', 'alvarobartt/wandbfsspec-tests/3s6km7mp/wandb-summary.json']
@@ -37,7 +37,7 @@ b'some: data\nfor: testing'
 Which is similar to how to locate and open a file from the Artifact Storage (just changing the class and the path):
 
 ```python
->>> from wandbfsspec.core import WandbArtifactStore
+>>> from wandbfsspec.spec import WandbArtifactStore
 >>> fs = WandbArtifactStore(api_key="YOUR_API_KEY")
 >>> fs.ls("wandb/yolo-chess/model/run_1dnrszzr_model/v8")
 ['wandb/yolo-chess/model/run_1dnrszzr_model/v8/last.pt']
