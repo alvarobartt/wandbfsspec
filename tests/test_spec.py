@@ -4,36 +4,74 @@
 import datetime
 from typing import List
 
-import fsspec
 import pytest
 
-from wandbfsspec.core import WandbFile, WandbFileSystem
+from wandbfsspec.core import WandbFile
+from wandbfsspec.spec import WandbArtifactStore, WandbFileSystem
 
 
-class TestFsspecFileSystem:
-    """Test `fsspec.FileSystem` class methods for `wandbfs`."""
+class TestWandbFileSystem:
+    """Test `wandbfsspec.core.WandbFileSystem` class methods."""
 
     @pytest.fixture(autouse=True)
     @pytest.mark.usefixtures("entity", "project", "run_id")
     def setup_method(self, entity: str, project: str, run_id: str) -> None:
-        self.fs = fsspec.filesystem(WandbFileSystem.protocol)
-        self.path = f"{WandbFileSystem.protocol}://{entity}/{project}/{run_id}"
+        self.fs = WandbFileSystem()
+        self.path = f"{self.fs.protocol}://{entity}/{project}/{run_id}"
         self.file_path = "file.yaml"
 
-    def teardown(self):
+    def teardown(self) -> None:
         del self.fs
 
     def test_ls(self) -> None:
-        """Test `fsspec.FileSystem.ls` method."""
+        """Test `WandbFileSystem.ls` method."""
         files = self.fs.ls(path=self.path)
         assert isinstance(files, List)
 
     def test_modified(self) -> None:
-        """Test `fsspec.FileSystem.modified` method."""
         modified_at = self.fs.modified(path=f"{self.path}/{self.file_path}")
         assert isinstance(modified_at, datetime.datetime)
 
     def test_open(self) -> None:
-        """Test `fsspec.FileSystem.open` method."""
-        with self.fs.open(path=f"{self.path}/{self.file_path}") as f:
-            assert isinstance(f, WandbFile)
+        _file = self.fs.open(path=f"{self.path}/{self.file_path}")
+        assert isinstance(_file, WandbFile)
+
+
+class TestWandbArtifactStore:
+    """Test `wandbfsspec.core.WandbArtifactStore` class methods."""
+
+    @pytest.fixture(autouse=True)
+    @pytest.mark.usefixtures(
+        "entity", "project", "artifact_type", "artifact_name", "artifact_version"
+    )
+    def setup_method(
+        self,
+        entity: str,
+        project: str,
+        artifact_type: str,
+        artifact_name: str,
+        artifact_version: str,
+    ) -> None:
+        self.fs = WandbArtifactStore()
+        self.path = f"{self.fs.protocol}://{entity}/{project}/{artifact_type}/{artifact_name}/{artifact_version}"
+        self.file_path = "file.yaml"
+
+    def teardown(self) -> None:
+        del self.fs
+
+    def test_ls(self) -> None:
+        """Test `WandbArtifactStore.ls` method."""
+        files = self.fs.ls(path=self.path)
+        assert isinstance(files, List)
+
+    def test_created(self) -> None:
+        created = self.fs.created(path=f"{self.path}/{self.file_path}")
+        assert isinstance(created, datetime.datetime)
+
+    def test_modified(self) -> None:
+        modified_at = self.fs.modified(path=f"{self.path}/{self.file_path}")
+        assert isinstance(modified_at, datetime.datetime)
+
+    def test_open(self) -> None:
+        _file = self.fs.open(path=f"{self.path}/{self.file_path}")
+        assert isinstance(_file, WandbFile)
