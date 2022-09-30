@@ -22,7 +22,7 @@ class MockRun:
     artifact_name: Union[str, None] = None
     artifact_version: Union[str, None] = None
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         assert os.getenv("WANDB_API_KEY"), (
             "In order to connect to the wandb Public API you need to provide the API"
             " key either via param `api_key`, setting the key in the environment"

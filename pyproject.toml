@@ -15,8 +15,8 @@ repository = "https://github.com/alvarobartt/wandbfsspec"
 license = "MIT License"
 
 [tool.poetry.plugins."fsspec.specs"]
-wandbfs = "wandbfsspec.core.WandbFileSystem"
-wandbas = "wandbfsspec.core.WandbArtifactStore"
+wandbfs = "wandbfsspec.spec.WandbFileSystem"
+wandbas = "wandbfsspec.spec.WandbArtifactStore"
 
 [tool.poetry.dependencies]
 python = ">=3.7,<3.10"
@@ -51,6 +51,10 @@ warn_return_any = true
 implicit_reexport = false
 strict_equality = true
 # --strict end
+
+[[tool.mypy.overrides]]
+module = ["fsspec.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 log_cli = true
