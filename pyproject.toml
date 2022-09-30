@@ -52,6 +52,10 @@ implicit_reexport = false
 strict_equality = true
 # --strict end
 
+[[tool.mypy.overrides]]
+module = ["fsspec.*"]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 log_cli = true
 log_cli_level = "INFO"
